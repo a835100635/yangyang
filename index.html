@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+  <script src="https://unpkg.com/vue@3.2.12/dist/vue.global.js"></script>
+  <title></title>
+</head>
+<body>
+  <div id="app">
+    <h1>第 {{ level }} 关</h1>
+    <header>
+      <span class="btn" @click="handleReset">重置</span>
+      <span class="btn" @click="handleSwitch('prev')">上一关</span>
+      <span class="btn" @click="handleSwitch('next')">下一关</span>
+    </header>
+    <!-- 容器 -->
+    <div class="container">
+      <div class="card" v-for="(item, index) in cards" :key="index" :style="setCardStyle(item)">
+        <span>{{ item.icon }}</span>
+      </div>
+    </div>
+    <!-- 卡槽 -->
+    <div class="card-slot">
+
+    </div>
+  </div>
+  <script>
+    const { reactive, toRefs, setup, computed } = Vue;
+    const App = {
+      setup() {
+        const data = reactive({
+          level: 1,
+          cards: []
+        });
+        // 卡片默认偏移值
+        const offsetDefaultValue = [0, 20, -20, 40, -40];
+        const offsetDefaultValueLength = offsetDefaultValue.length;
+
+        // 卡片默认图标
+        const defaultIcons = ['🐑','😀', '😭', '😂', '😍', '😎', '😘', '😳', '😇', '🤪'];
+        const icons = defaultIcons.slice(0, 2 * data.level);
+
+        // 卡片默认生成3的倍数
+        const defaultRounds = [3, 6, 9];
+
+        // 卡片随机选区
+        const defaultRange = computed(() => {
+          return [[2, 5], [3, 7], [0, 7],[2, 9], [1, 8]][Math.min(4, data.level - 1)]
+        })
+
+        // 创建卡片属性集合
+        const createCardInfo = (icon) => {
+          // 偏移
+          const offset = offsetDefaultValue[Math.floor(offsetDefaultValueLength * Math.random())];
+          // 行
+          const row = defaultRange.value[0] + Math.floor((defaultRange.value[1] - defaultRange.value[0]) * Math.random());
+          // 列
+          const col = defaultRange.value[0] + Math.floor((defaultRange.value[1] - defaultRange.value[0]) * Math.random());
+
+          data.cards.push({
+            icon,
+            x: col * 100 + offset,
+            y: row * 100 + offset
+          })
+        }
+
+        console.log(icons);
+
+        // 初始化
+        const init = () => {
+          for(const i in icons) {
+            // 随机3的倍数
+            const rounds = defaultRounds[Math.floor(Math.random() * 3)];
+            for(let k = 0; k < rounds; k++) {
+              createCardInfo(icons[i]);
+            }
+          }
+        }
+        init();
+        console.log(data.cards)
+
+        // 设置卡片样式
+        const setCardStyle = (info) => {
+          const { x, y } = info;
+          return `
+            transform: translateX(${x}%) translateY(${y}%);
+          `;
+        }
+
+        // 切换关卡
+        const handleSwitch = (type) => {
+          if(type === 'prev') {
+            if(data.level === 1) {
+              window.alert('已经是第一关了');
+              return;
+            }
+            data.level--;
+          } else {
+            if(data.level === 10) {
+              window.alert('已经是最后一关了');
+              return;
+            }
+            data.level++;
+          }
+          handleReset();
+        }
+
+        // 重置游戏
+        const handleReset = () => {
+          // 清空已有的卡片
+          data.cards.length = 0;
+          init();
+        }
+
+        const dataRefs = toRefs(data);
+        return {
+          ...dataRefs,
+          setCardStyle,
+          handleSwitch,
+          handleReset
+        }
+      }
+    }
+    Vue.createApp(App).mount('#app');
+  </script>
+</body>
+</html>

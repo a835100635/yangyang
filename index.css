@@ -1,0 +1,65 @@
+html, body {
+  height: 100vh;
+  width: 100vw;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/*** 按钮 ***/
+.btn {
+  display: inline-block;
+  margin-bottom: 10px;
+  background: #3498db;
+  border-radius: 28px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 8px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover {
+  background: #3cb0fd;
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+.btn+.btn {
+  margin-left: 10px;
+}
+
+
+/*** 卡片容器 ***/
+.container {
+  position: relative;
+  width: 60%;
+  max-width: 600px;
+  aspect-ratio: 16/16;
+  border: 1px solid #ccc;
+}
+
+/*** 卡片 ***/
+.card {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(12.5% - 4px);
+  width: calc(12.5% - 4px);
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  font-size: 30px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/*** 卡槽 ***/
+.card-slot {
+
+}

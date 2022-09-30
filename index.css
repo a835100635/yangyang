@@ -8,8 +8,8 @@ html, body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  padding-top: 8vh;
 }
 
 /*** 按钮 ***/
@@ -38,7 +38,7 @@ html, body {
 /*** 卡片容器 ***/
 .container {
   position: relative;
-  width: 60%;
+  width: 80%;
   max-width: 600px;
   aspect-ratio: 16/16;
   border: 1px solid #ccc;

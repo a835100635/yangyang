@@ -41,7 +41,9 @@
 
         // 卡片默认图标
         const defaultIcons = ['🐑','😀', '😭', '😂', '😍', '😎', '😘', '😳', '😇', '🤪'];
-        const icons = defaultIcons.slice(0, 2 * data.level);
+        const icons = computed(() => {
+          return defaultIcons.slice(0, 2 * data.level);
+        })
 
         // 卡片默认生成3的倍数
         const defaultRounds = [3, 6, 9];
@@ -67,15 +69,15 @@
           })
         }
 
-        console.log(icons);
-
+        
         // 初始化
         const init = () => {
-          for(const i in icons) {
+          console.log('init---', icons.value);
+          for(const i in icons.value) {
             // 随机3的倍数
             const rounds = defaultRounds[Math.floor(Math.random() * 3)];
             for(let k = 0; k < rounds; k++) {
-              createCardInfo(icons[i]);
+              createCardInfo(icons.value[i]);
             }
           }
         }

@@ -34,14 +34,18 @@ html, body {
   margin-left: 10px;
 }
 
+.wrap {
+  padding: 40px;
+  border: 1px solid #ccc;
+}
 
 /*** 卡片容器 ***/
 .container {
   position: relative;
-  width: 80%;
-  max-width: 600px;
+  /* width: 80%; */
+  width: 480px;
+  max-width: 500px;
   aspect-ratio: 16/16;
-  border: 1px solid #ccc;
 }
 
 /*** 卡片 ***/
@@ -50,16 +54,33 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(12.5% - 4px);
-  width: calc(12.5% - 4px);
-  border: 2px solid #ccc;
+  /* height: calc(12.5% - 4px); */
+  /* width: calc(12.5% - 4px); */
+  height: calc(60px - 4px);
+  width: calc(60px - 4px);
+  border: 2px solid rgb(100, 100, 100);
   border-radius: 10px;
   font-size: 30px;
-  background-color: white;
   cursor: pointer;
+  background-color: #ccc;
+  transition: all 0.3s;
+  user-select: none;
+}
+.card span {
+  opacity: 0.5;
+}
+.is-allow {
+  background-color: white;
+}
+.is-allow span {
+  opacity: 1;
 }
 
 /*** 卡槽 ***/
 .card-slot {
-
+  margin-top: 20px;
+  padding: 10px 20px 10px 20px;
+  border: 1px solid #ccc;
+  height: 60px;
+  width: 480px;
 }

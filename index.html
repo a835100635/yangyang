@@ -10,30 +10,77 @@
 </head>
 <body>
   <div id="app">
-    <h1>第 {{ level }} 关</h1>
+    <!-- <h1>第 {{ level }} 关</h1> -->
     <header>
-      <span class="btn" @click="handleReset">重置</span>
-      <span class="btn" @click="handleSwitch('prev')">上一关</span>
-      <span class="btn" @click="handleSwitch('next')">下一关</span>
+      <!-- <span class="btn" @click="handleStart">开始游戏</span> -->
+      <!-- <span class="btn" @click="handleReset">重置</span> -->
+      <!-- <span class="btn" @click="handleSwitch('prev')">上一关</span>
+      <span class="btn" @click="handleSwitch('next')">下一关</span> -->
+      <span class="btn" @click="handleStart">--</span>
+      <span class="btn" @click="handleReset">==</span>
+      <span class="btn" @click="handleSwitch('prev')">1</span>
+      <span class="btn" @click="handleSwitch('next')">2</span>
     </header>
     <!-- 容器 -->
-    <div class="container">
-      <div class="card" v-for="(item, index) in cards" :key="index" :style="setCardStyle(item)">
-        <span>{{ item.icon }}</span>
+    <div class="wrap">
+      <div class="container">
+        <div class="card" 
+          v-for="(item, index) in cards" 
+          :key="index" 
+          :style="setCardStyle(item)" 
+          :class="[item.not && 'is-allow', item.id]"
+          @click="clickCard(item, index)"
+        >
+          <span>{{ item.icon }}</span>
+        </div>
       </div>
     </div>
     <!-- 卡槽 -->
-    <div class="card-slot">
-
-    </div>
+    <div class="card-slot"></div>
   </div>
   <script>
-    const { reactive, toRefs, setup, computed } = Vue;
+    const randomString = (len) => {
+        const pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let res = '';
+        while (len > 0) {
+            res += pool[Math.floor(pool.length * Math.random())];
+            len--;
+        }
+        return res;
+    }
+    // 常量
+    const constants = {
+      base: 60,
+      selectMaxLength: 8
+    }
+
+    const { reactive, toRefs, setup, computed, onMounted } = Vue;
     const App = {
       setup() {
+
+        onMounted(() => {
+          const containerDom = document.querySelector('.container');
+          data.containerInfo = containerDom.getClientRects()[0];
+          const cardSlotDom = document.querySelector('.card-slot');
+          data.cardSlotInfo = cardSlotDom.getClientRects()[0];
+        })
+        // 容器偏移量
+        const containerOffset = computed(() => {
+          const { x = 0, y = 0, width = 0, height = 0 } = data.containerInfo;
+          return {
+            minX: x,
+            maxX: x + width,
+            minY: y,
+            maxY: y + height
+          }
+        })
+
         const data = reactive({
           level: 1,
-          cards: []
+          cards: [],
+          select: [],
+          containerInfo: null,
+          cardSlotInfo: null
         });
         // 卡片默认偏移值
         const offsetDefaultValue = [0, 20, -20, 40, -40];
@@ -48,31 +95,32 @@
         // 卡片默认生成3的倍数
         const defaultRounds = [3, 6, 9];
 
-        // 卡片随机选区
-        const defaultRange = computed(() => {
-          return [[2, 5], [3, 7], [0, 7],[2, 9], [1, 8]][Math.min(4, data.level - 1)]
-        })
-
         // 创建卡片属性集合
         const createCardInfo = (icon) => {
           // 偏移
           const offset = offsetDefaultValue[Math.floor(offsetDefaultValueLength * Math.random())];
-          // 行
-          const row = defaultRange.value[0] + Math.floor((defaultRange.value[1] - defaultRange.value[0]) * Math.random());
-          // 列
-          const col = defaultRange.value[0] + Math.floor((defaultRange.value[1] - defaultRange.value[0]) * Math.random());
+          // 随机8列 8行
+          const row = Math.floor(Math.random() * 8);
+          const col = Math.floor(Math.random() * 8);
 
+          let x = col * constants.base + offset;
+          let y = row * constants.base + offset;
+          
           data.cards.push({
+            id: randomString(6),
             icon,
-            x: col * 100 + offset,
-            y: row * 100 + offset
+            x,
+            y,
+            not: true,
+            status: 0
           })
         }
 
         
         // 初始化
         const init = () => {
-          console.log('init---', icons.value);
+          console.log('init---', icons.value );
+          data.select = [];
           for(const i in icons.value) {
             // 随机3的倍数
             const rounds = defaultRounds[Math.floor(Math.random() * 3)];
@@ -80,15 +128,21 @@
               createCardInfo(icons.value[i]);
             }
           }
+          checkShading();
         }
-        init();
-        console.log(data.cards)
+
+        const handleStart = () => {
+          if(data.cards.length) {
+              window.alert('游戏中');
+              return;
+          }
+          init();
+        }
 
         // 设置卡片样式
-        const setCardStyle = (info) => {
-          const { x, y } = info;
+        const setCardStyle = ({ x, y }) => {
           return `
-            transform: translateX(${x}%) translateY(${y}%);
+            transform: translateX(${x}px) translateY(${y}px);
           `;
         }
 
@@ -117,12 +171,85 @@
           init();
         }
 
+        // 是否能点击 是否有阴影
+        const checkShading = () => {
+          const cards = data.cards.slice();
+          for (let i = 0; i < cards.length; i++) {
+            const cur = cards[i];
+            cur.not = true;
+            if (cur.status !== 0) continue;
+            const { x: x1, y: y1 } = cur;
+            const x2 = x1 + constants.base,
+                y2 = y1 + constants.base;
+
+            for (let j = i + 1; j < cards.length; j++) {
+              if (cur.status !== 0) continue;
+              const compare = cards[j];
+              const { x, y } = compare;
+              if (!(y + constants.base <= y1 || y >= y2 || x + constants.base <= x1 || x >= x2)) {
+                  cur.not = false;
+                  break;
+              }
+            }
+          }
+        }
+
+        // 刷新卡槽卡片位置
+        const refreshCardPosition = (item) => {
+          const length = data.select.length;
+          const { x, y } = data.cardSlotInfo;
+          const { top } = data.containerInfo;
+
+          let lastIndex = length - 1;
+          console.log('--', JSON.parse(JSON.stringify(data.select)));
+          data.select.forEach((i, index) => {
+            console.log('item.icon === i.icon', item.icon, i.icon,  item.icon === i.icon, index);
+            if(item.icon === i.icon) {
+              lastIndex  = index;
+            }
+          })
+          console.log('lastIndex', lastIndex);
+
+          if(length){
+            for (let i = lastIndex + 1; i < length; i++) {
+              data.select[i].x += 60;
+            }
+          }
+          item.x = x + lastIndex * 60;
+          item.y = y - top + 10;
+        }
+
+        const clickCard = async (item, index) => {
+          const length = data.select.length;
+          const { selectMaxLength } = constants;
+          if(item.not && length < selectMaxLength) {
+            const cards = data.cards.slice();
+            const currentCard = cards[index];
+            currentCard.status = 1;
+
+            // 刷新卡槽位置
+            await refreshCardPosition(currentCard);
+
+            data.select.push(currentCard);
+
+            // 刷新被遮挡卡片
+            checkShading();
+          };
+
+          // 校验卡片卡槽卡片数量长度
+          if(data.select.length >= 8) {
+            console.log('失败');
+          }
+        }
+
         const dataRefs = toRefs(data);
         return {
           ...dataRefs,
+          handleStart,
           setCardStyle,
           handleSwitch,
-          handleReset
+          handleReset,
+          clickCard
         }
       }
     }

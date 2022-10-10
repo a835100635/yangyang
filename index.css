@@ -10,6 +10,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   padding-top: 8vh;
+  box-sizing: border-box;
 }
 
 /*** 按钮 ***/
@@ -35,36 +36,42 @@ html, body {
 }
 
 .wrap {
-  padding: 40px;
+  padding: 50px;
   border: 1px solid #ccc;
+  border-radius: 10px;
 }
 
 /*** 卡片容器 ***/
 .container {
   position: relative;
-  /* width: 80%; */
   width: 480px;
   max-width: 500px;
   aspect-ratio: 16/16;
 }
 
 /*** 卡片 ***/
-.card {
+.card-wrap {
   position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* height: calc(12.5% - 4px); */
-  /* width: calc(12.5% - 4px); */
-  height: calc(60px - 4px);
-  width: calc(60px - 4px);
-  border: 2px solid rgb(100, 100, 100);
-  border-radius: 10px;
+  height: 60px;
+  width: 60px;
   font-size: 30px;
   cursor: pointer;
-  background-color: #ccc;
-  transition: all 0.3s;
+  transition: all 0.2s;
   user-select: none;
+}
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(100% - 4px);
+  height:calc(100% - 4px);
+  border: 2px solid rgb(100, 100, 100);
+  border-radius: 10px;
+  background-color: #ccc;
 }
 .card span {
   opacity: 0.5;
@@ -75,6 +82,19 @@ html, body {
 .is-allow span {
   opacity: 1;
 }
+/*** 卡片动画 ***/
+@keyframes scaleDraw {
+  0% {
+    transform: scale(1.1);
+  }
+  20% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
 
 /*** 卡槽 ***/
 .card-slot {
@@ -83,4 +103,5 @@ html, body {
   border: 1px solid #ccc;
   height: 60px;
   width: 480px;
+  border-radius: 10px;
 }

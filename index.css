@@ -50,8 +50,10 @@ html, body {
 .container {
   position: relative;
   width: 320px;
+  height: 320px;
   max-width: 500px;
-  aspect-ratio: 16/16;
+  /* 不兼容 */
+  /* aspect-ratio: 16/16; */
 }
 
 /*** 卡片 ***/
@@ -108,6 +110,6 @@ html, body {
   padding: 10px 20px 10px 20px;
   border: 1px solid #ccc;
   height: 40px;
-  width: 320px;
+  width: 280px;
   border-radius: 10px;
 }

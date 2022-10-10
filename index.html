@@ -53,7 +53,7 @@
       // 与卡片宽度一致
       base: 40,
       // 卡槽中最长卡片长度
-      selectMaxLength: 8,
+      selectMaxLength: 7,
       // 卡槽设定多少个相同卡片就消掉
       maxCount: 3,
       // 动画时间 毫秒
@@ -109,13 +109,13 @@
         const defaultOffsetValueLength = defaultOffsetValue.length;
 
         // 卡片默认图标
-        const defaultIcons = ['🐑','😀', '😭', '😂', '😍', '😎', '😘', '😳', '😇', '🤪'];
+        const defaultIcons = ['🐑', '🌹', '🐖', '🍚', '👓', '🐭', '😘', '🍑', '⭐', '💩', '💊', '🎈'];
         const icons = computed(() => {
           return defaultIcons.slice(0, 2 * data.level);
         });
 
-        // 卡片默认生成3的倍数
-        const defaultRounds = [3, 6, 9];
+        // 卡片默认生成3的倍数 不是3的倍数的则不可能通关 10%的概率
+        const defaultRounds = [3, 6, 9, 3, 6, 3, 3, 6, 3, 4];
 
         // 创建卡片属性集合
         const createCardInfo = (icon) => {
@@ -147,8 +147,7 @@
         // 初始化
         const init = () => {
           console.log('init game--->', icons.value);
-
-          data.select = new Map();
+          data.select.clear();
           for(const i in icons.value) {
             // 随机3的倍数
             const rounds = defaultRounds[Math.floor(Math.random() * defaultRounds.length)];
@@ -215,14 +214,16 @@
           for (let i = 0; i < cards.length; i++) {
             const cur = cards[i];
             cur.not = true;
-            if (cur.status !== 0) continue;
+            // 已消完卡片和在卡槽内的卡片跳过
+            if (cur.status !== 0 || cur.display) continue;
             const { x: x1, y: y1 } = cur;
             const x2 = x1 + constants.base,
                 y2 = y1 + constants.base;
 
             for (let j = i + 1; j < cards.length; j++) {
-              if (cur.status !== 0) continue;
               const compare = cards[j];
+              // 已消完卡片和在卡槽内的卡片跳过
+              if (compare.status !== 0 || compare.display) continue;
               const { x, y } = compare;
               if (!(y + constants.base <= y1 || y >= y2 || x + constants.base <= x1 || x >= x2)) {
                   cur.not = false;
@@ -252,7 +253,7 @@
           let index = 0;
           data.select.forEach((item) => {
             item.forEach((card) => {
-              card.x = index * constants.base;
+              card.x = index * constants.base + constants.base / 2;
               card.y = y - top + 12;
               index++;
             });
@@ -278,8 +279,9 @@
 
            // 校验卡片卡槽卡片数量长度
           setTimeout(() => {
-            if(selectLength.value > 7) {
-              alert('游戏失败')
+            if(selectLength.value >= constants.selectMaxLength) {
+              alert('游戏失败 重新开始');
+              init();
             }
           }, constants.animationTime);
 

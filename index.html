@@ -38,8 +38,8 @@
     <div class="card-slot"></div>
   </div>
   <script>
-    // 最急取id
-    const randomString = (len) => {
+    // 随机生成指定长度id
+    const randomCreateId = (len) => {
         const pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let res = '';
         while (len > 0) {
@@ -105,14 +105,14 @@
         });
 
         // 卡片默认偏移值
-        const offsetDefaultValue = [0, 20, -20, 40, -40];
-        const offsetDefaultValueLength = offsetDefaultValue.length;
+        const defaultOffsetValue = [7, -7, 20, -20, 25, -25, 33, -33, 40, -40];
+        const defaultOffsetValueLength = defaultOffsetValue.length;
 
         // 卡片默认图标
         const defaultIcons = ['🐑','😀', '😭', '😂', '😍', '😎', '😘', '😳', '😇', '🤪'];
         const icons = computed(() => {
           return defaultIcons.slice(0, 2 * data.level);
-        })
+        });
 
         // 卡片默认生成3的倍数
         const defaultRounds = [3, 6, 9];
@@ -120,7 +120,7 @@
         // 创建卡片属性集合
         const createCardInfo = (icon) => {
           // 偏移
-          const offset = offsetDefaultValue[Math.floor(offsetDefaultValueLength * Math.random())];
+          const offset = defaultOffsetValue[Math.floor(defaultOffsetValueLength * Math.random())];
           // 随机8列 8行
           const row = Math.floor(Math.random() * 8);
           const col = Math.floor(Math.random() * 8);
@@ -129,10 +129,11 @@
           let y = row * constants.base + offset;
           
           data.cards.push({
-            id: randomString(6),
+            id: randomCreateId(6),
             icon,
             x,
             y,
+            // 控制遮罩层
             not: true,
             // 是否在卡槽中 0否 1是
             status: 0,
@@ -143,14 +144,14 @@
           })
         }
 
-        
         // 初始化
         const init = () => {
-          console.log('init---', icons.value );
+          console.log('init game--->', icons.value);
+
           data.select = new Map();
           for(const i in icons.value) {
             // 随机3的倍数
-            const rounds = defaultRounds[Math.floor(Math.random() * 3)];
+            const rounds = defaultRounds[Math.floor(Math.random() * defaultRounds.length)];
             for(let k = 0; k < rounds; k++) {
               createCardInfo(icons.value[i]);
             }

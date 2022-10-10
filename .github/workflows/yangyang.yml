@@ -1,6 +1,11 @@
+#  workflow 的名称
 name: yangyang
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push, merge]
+# on 指定触发事件时，可以限定分支或标签。
+on: 
+  push:
+    branches:
+      - master
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest

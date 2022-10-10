@@ -1,14 +1,19 @@
 #  workflow 的名称
 name: yangyang
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: 页面部署 🚀
 # on 指定触发事件时，可以限定分支或标签。
 on: 
+  # push 操作会触发
   push:
+    # 分支
     branches:
       - master
 jobs:
-  Explore-GitHub-Actions:
+  # 任务名称
+  Deploy-YangYang-Game:
+    # 指定运行所需要的虚拟机环境
     runs-on: ubuntu-latest
+    # 步骤 每个 job 由多个 step 构成，一步步完成
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"

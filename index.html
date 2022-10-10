@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
   <link rel="stylesheet" href="index.css">
   <script src="https://unpkg.com/vue@3.2.12/dist/vue.global.js"></script>
   <title></title>
@@ -51,7 +51,7 @@
     // 常量
     const constants = {
       // 与卡片宽度一致
-      base: 60,
+      base: 40,
       // 卡槽中最长卡片长度
       selectMaxLength: 8,
       // 卡槽设定多少个相同卡片就消掉
@@ -247,22 +247,20 @@
             }
           }
 
+          // 重新刷新位置
           let index = 0;
           data.select.forEach((item) => {
             item.forEach((card) => {
-              card.x = index * 60;
+              card.x = index * constants.base;
               card.y = y - top + 12;
               index++;
             });
           });
-
         }
 
         const clickCard = async (item, index) => {
           // 卡槽中的卡片不允许点击
-          if(item.status === 1) {
-            return;
-          }
+          if(item.status === 1) return;
 
           const length = selectLength.value;
           const { selectMaxLength } = constants;
@@ -277,10 +275,13 @@
             checkShading();
           };
 
-          // 校验卡片卡槽卡片数量长度
-          if(selectLength.value >= 7) {
-            alert('游戏失败')
-          }
+           // 校验卡片卡槽卡片数量长度
+          setTimeout(() => {
+            if(selectLength.value > 7) {
+              alert('游戏失败')
+            }
+          }, constants.animationTime);
+
         }
 
         // 校验卡槽中是否3个相同的存在
@@ -302,7 +303,7 @@
               // 校验是否卡片列表是否还有未消除的卡片
               const hasCards = data.cards.filter((item) => !item.display);
               if(!hasCards.length) {
-                alert('通关啦');
+                alert(`通关啦, 开始第${data.level + 1}关`);
                 data.level++;
               }
             }, constants.animationTime);

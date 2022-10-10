@@ -3,6 +3,11 @@ html, body {
   width: 100vw;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 #app {
   height: 100%;
   width: 100%;
@@ -36,7 +41,7 @@ html, body {
 }
 
 .wrap {
-  padding: 50px;
+  padding: 44px;
   border: 1px solid #ccc;
   border-radius: 10px;
 }
@@ -44,7 +49,7 @@ html, body {
 /*** 卡片容器 ***/
 .container {
   position: relative;
-  width: 480px;
+  width: 320px;
   max-width: 500px;
   aspect-ratio: 16/16;
 }
@@ -55,8 +60,8 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px;
-  width: 60px;
+  height: 40px;
+  width: 40px;
   font-size: 30px;
   cursor: pointer;
   transition: all 0.2s;
@@ -67,14 +72,15 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: calc(100% - 4px);
-  height:calc(100% - 4px);
-  border: 2px solid rgb(100, 100, 100);
+  width: calc(100% - 2px);
+  height:calc(100% - 2px);
+  border: 1px solid rgb(100, 100, 100);
   border-radius: 10px;
   background-color: #ccc;
 }
 .card span {
   opacity: 0.5;
+  font-size: 20px;
 }
 .is-allow {
   background-color: white;
@@ -101,7 +107,7 @@ html, body {
   margin-top: 20px;
   padding: 10px 20px 10px 20px;
   border: 1px solid #ccc;
-  height: 60px;
-  width: 480px;
+  height: 40px;
+  width: 320px;
   border-radius: 10px;
 }

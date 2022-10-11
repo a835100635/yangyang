@@ -19,7 +19,7 @@
     </header>
     <!-- 容器 -->
     <div class="wrap">
-      <div class="container">
+      <div class="container" :style="setContainerStyle()">
         <div class="card-wrap"
           v-for="(item, index) in cards" 
           :key="index"  
@@ -38,33 +38,44 @@
     <div class="card-slot"></div>
   </div>
   <script>
-    // 随机生成指定长度id
-    const randomCreateId = (len) => {
-        const pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        let res = '';
-        while (len > 0) {
-            res += pool[Math.floor(pool.length * Math.random())];
-            len--;
-        }
-        return res;
-    }
-    // 常量
-    const constants = {
-      // 与卡片宽度一致
-      base: 40,
-      // 卡槽中最长卡片长度
-      selectMaxLength: 7,
-      // 卡槽设定多少个相同卡片就消掉
-      maxCount: 3,
-      // 动画时间 毫秒
-      animationTime: 400,
-      // 最大关数
-      maxLevel: 10
-    }
-
     const { reactive, toRefs, setup, computed, onMounted, watch } = Vue;
     const App = {
       setup() {
+        /**
+         * 容器样式
+         */
+        const setContainerStyle = () => {
+          const { base, row, col } = config;
+          return `height: ${base * row}px; width: ${base * col}px`;
+        }
+        /**
+         * 设置卡片位置
+         */
+        const setCardStyle = ({ x, y }) => {
+          return `
+            transform: translateX(${x}px) translateY(${y}px);
+          `;
+        }
+        /**
+         * 设置卡片动画
+         */
+        const setAnimation = ({ id, clear, display }) => {
+          let isClear = ''
+          if(clear) {
+            isClear = `animation: scaleDraw ${config.animationTime}ms;`
+          }
+          if(display) {
+            isClear += 'display: none;';
+          }
+          return isClear;
+        }
+        
+        /**
+         * 随机生成指定长度id
+         */
+        const randomCreateId = (length) => {
+            return (Math.random() + new Date().getTime()).toString(32).slice(0,length);
+        }
 
         onMounted(() => {
           const containerDom = document.querySelector('.container');
@@ -72,16 +83,24 @@
           const cardSlotDom = document.querySelector('.card-slot');
           data.cardSlotInfo = cardSlotDom.getClientRects()[0];
         })
-        // 容器偏移量
-        const containerOffset = computed(() => {
-          const { x = 0, y = 0, width = 0, height = 0 } = data.containerInfo;
-          return {
-            minX: x,
-            maxX: x + width,
-            minY: y,
-            maxY: y + height
-          }
-        })
+
+        // 配置项
+        const config = reactive({
+          // 与卡片宽度一致
+          base: 40,
+          // 卡槽中最长卡片长度
+          selectMaxLength: 7,
+          // 卡槽设定多少个相同卡片就消掉
+          maxCount: 3,
+          // 动画时间 毫秒
+          animationTime: 400,
+          // 最大关数
+          maxLevel: 10,
+          // 行
+          row: 8,
+          // 列
+          col: 8,
+        });
 
         const data = reactive({
           level: 1,
@@ -91,12 +110,17 @@
           cardSlotInfo: null
         });
 
+        /**
+         * 等级切换 重置游戏 
+         */
         watch(() => data.level, () => {
           handleReset();
         });
 
+        /**
+         * 卡槽已存在卡片长度
+         */
         const selectLength = computed(() => {
-          const size = data.select.size;
           let length = 0;
           data.select.forEach((item) => {
             length += item.length;
@@ -104,29 +128,58 @@
           return length;
         });
 
-        // 卡片默认偏移值
-        const defaultOffsetValue = [7, -7, 20, -20, 25, -25, 33, -33, 40, -40];
-        const defaultOffsetValueLength = defaultOffsetValue.length;
-
-        // 卡片默认图标
+        /**
+         * 卡片默认图标
+         */
         const defaultIcons = ['🐑', '🌹', '🐖', '🍚', '👓', '🐭', '😘', '🍑', '⭐', '💩', '💊', '🎈'];
+        /**
+         * 根据等级选择卡片图标的多种选择
+         */
         const icons = computed(() => {
           return defaultIcons.slice(0, 2 * data.level);
         });
 
-        // 卡片默认生成3的倍数 不是3的倍数的则不可能通关 10%的概率
-        const defaultRounds = [3, 6, 9, 3, 6, 3, 3, 6, 3, 4];
+        /**
+         * 卡片默认偏移值 随意设定
+         */
+        const defaultOffsetValue = [7, -7, 20, -20, 25, -25, 33, -33, 40, -40];
+        const defaultOffsetValueLength = defaultOffsetValue.length;
 
-        // 创建卡片属性集合
+        /**
+         * 卡片默认生成3的倍数 不是3的倍数的则不可能通关
+         */
+        const defaultRounds = [3, 6, 9, 3, 6, 3, 3, 6, 3];
+
+
+        /**
+         * 初始化
+         */
+        const init = () => {
+          console.log('init game--->', icons.value);
+          data.select.clear();
+          for(const i in icons.value) {
+            // 随机3的倍数
+            const rounds = defaultRounds[Math.floor(Math.random() * defaultRounds.length)];
+            for(let k = 0; k < rounds; k++) {
+              createCardInfo(icons.value[i]);
+            }
+          }
+          checkShading();
+        }
+
+        /**
+         * 创建卡片属性
+         * id icon x y 。。。
+         */
         const createCardInfo = (icon) => {
           // 偏移
           const offset = defaultOffsetValue[Math.floor(defaultOffsetValueLength * Math.random())];
           // 随机8列 8行
-          const row = Math.floor(Math.random() * 8);
-          const col = Math.floor(Math.random() * 8);
+          const row = Math.floor(Math.random() * config.row);
+          const col = Math.floor(Math.random() * config.col);
 
-          let x = col * constants.base + offset;
-          let y = row * constants.base + offset;
+          let x = col * config.base + offset;
+          let y = row * config.base + offset;
           
           data.cards.push({
             id: randomCreateId(6),
@@ -144,47 +197,57 @@
           })
         }
 
-        // 初始化
-        const init = () => {
-          console.log('init game--->', icons.value);
-          data.select.clear();
-          for(const i in icons.value) {
-            // 随机3的倍数
-            const rounds = defaultRounds[Math.floor(Math.random() * defaultRounds.length)];
-            for(let k = 0; k < rounds; k++) {
-              createCardInfo(icons.value[i]);
+        /**
+         * 是否能点击 是否有阴影
+         */
+        const checkShading = () => {
+          const cards = data.cards;
+          for (let i = 0; i < cards.length; i++) {
+            const cur = cards[i];
+            cur.not = true;
+            // 已消完卡片和在卡槽内的卡片跳过
+            if (cur.status !== 0 || cur.display) continue;
+            const { x: x1, y: y1 } = cur;
+            const x2 = x1 + config.base,
+                y2 = y1 + config.base;
+
+            for (let j = i + 1; j < cards.length; j++) {
+              const compare = cards[j];
+              // 已消完卡片和在卡槽内的卡片跳过
+              if (compare.status !== 0 || compare.display) continue;
+              const { x, y } = compare;
+              if (!(y + config.base <= y1 || y >= y2 || x + config.base <= x1 || x >= x2)) {
+                  cur.not = false;
+                  break;
+              }
             }
           }
-          checkShading();
         }
 
+        /**
+         * 开始游戏
+         */
         const handleStart = () => {
           if(data.cards.length) {
               window.alert('游戏中');
               return;
           }
           init();
+        }        
+        
+        /**
+         * 重置游戏
+         */
+        const handleReset = () => {
+          // 清空已有的卡片
+          data.cards.length = 0;
+          data.select.clear();
+          init();
         }
 
-        // 设置卡片样式
-        const setCardStyle = ({ x, y }) => {
-          return `
-            transform: translateX(${x}px) translateY(${y}px);
-          `;
-        }
-        // 设置卡片动画
-        const setAnimation = ({ id, clear, display }) => {
-          let isClear = ''
-          if(clear) {
-            isClear = `animation: scaleDraw ${constants.animationTime}ms;`
-          }
-          if(display) {
-            isClear += 'display: none;';
-          }
-          return isClear;
-        }
-
-        // 切换关卡
+        /**
+         * 切换关卡
+         */
         const handleSwitch = (type) => {
           if(type === 'prev') {
             if(data.level === 1) {
@@ -201,39 +264,39 @@
           }
         }
 
-        // 重置游戏
-        const handleReset = () => {
-          // 清空已有的卡片
-          data.cards.length = 0;
-          init();
-        }
+        /**
+         * 点击卡片
+         */
+        const clickCard = async (item, index) => {
+          // 卡槽中的卡片不允许点击
+          if(item.status === 1) return;
 
-        // 是否能点击 是否有阴影
-        const checkShading = () => {
-          const cards = data.cards.slice();
-          for (let i = 0; i < cards.length; i++) {
-            const cur = cards[i];
-            cur.not = true;
-            // 已消完卡片和在卡槽内的卡片跳过
-            if (cur.status !== 0 || cur.display) continue;
-            const { x: x1, y: y1 } = cur;
-            const x2 = x1 + constants.base,
-                y2 = y1 + constants.base;
+          const length = selectLength.value;
+          const { selectMaxLength } = config;
+          if(item.not && length < selectMaxLength) {
+            const cards = data.cards;
+            const currentCard = cards[index];
+            currentCard.status = 1;
 
-            for (let j = i + 1; j < cards.length; j++) {
-              const compare = cards[j];
-              // 已消完卡片和在卡槽内的卡片跳过
-              if (compare.status !== 0 || compare.display) continue;
-              const { x, y } = compare;
-              if (!(y + constants.base <= y1 || y >= y2 || x + constants.base <= x1 || x >= x2)) {
-                  cur.not = false;
-                  break;
-              }
+            // 刷新卡槽位置
+            await refreshCardPosition(currentCard);
+            // 刷新被遮挡卡片
+            checkShading();
+          };
+
+           // 校验卡片卡槽卡片数量长度
+          setTimeout(() => {
+            if(selectLength.value >= config.selectMaxLength) {
+              alert('游戏失败 重新开始');
+              init();
             }
-          }
+          }, config.animationTime);
+
         }
 
-        // 刷新卡槽卡片位置
+        /**
+         * 刷新卡槽卡片位置
+         */
         const refreshCardPosition = (item) => {
           const { x, y } = data.cardSlotInfo;
           const { top } = data.containerInfo;
@@ -248,48 +311,22 @@
               data.select.set(item.icon, [item]);
             }
           }
-
           // 重新刷新位置
           let index = 0;
           data.select.forEach((item) => {
             item.forEach((card) => {
-              card.x = index * constants.base + constants.base / 2;
+              card.x = index * config.base + config.base / 2;
               card.y = y - top + 12;
               index++;
             });
           });
         }
 
-        const clickCard = async (item, index) => {
-          // 卡槽中的卡片不允许点击
-          if(item.status === 1) return;
-
-          const length = selectLength.value;
-          const { selectMaxLength } = constants;
-          if(item.not && length < selectMaxLength) {
-            const cards = data.cards.slice();
-            const currentCard = cards[index];
-            currentCard.status = 1;
-
-            // 刷新卡槽位置
-            await refreshCardPosition(currentCard);
-            // 刷新被遮挡卡片
-            checkShading();
-          };
-
-           // 校验卡片卡槽卡片数量长度
-          setTimeout(() => {
-            if(selectLength.value >= constants.selectMaxLength) {
-              alert('游戏失败 重新开始');
-              init();
-            }
-          }, constants.animationTime);
-
-        }
-
-        // 校验卡槽中是否3个相同的存在
+        /**
+         * 校验卡槽中是否3个相同的存在
+         */
         const checkSelectQueue = (cards) => {
-          if(cards.length === constants.maxCount) {
+          if(cards.length === config.maxCount) {
             cards.forEach((item) => {
               item.clear = true;
             })
@@ -309,7 +346,7 @@
                 alert(`通关啦, 开始第${data.level + 1}关`);
                 data.level++;
               }
-            }, constants.animationTime);
+            }, config.animationTime);
           }
         }
 
@@ -317,6 +354,7 @@
         return {
           ...dataRefs,
           handleStart,
+          setContainerStyle,
           setCardStyle,
           setAnimation,
           handleSwitch,

@@ -16,6 +16,16 @@
       <span class="btn" @click="handleReset">重置</span>
       <span class="btn" @click="handleSwitch('prev')">上一关</span>
       <span class="btn" @click="handleSwitch('next')">下一关</span>
+      <p class="center">
+        行: 
+        <select v-model="config.row">
+          <option :value ="item" v-for="item in [3,4,5,6,7,8]">{{ item }}</option>
+        </select>
+        列: 
+        <select v-model="config.col">
+          <option :value ="item" v-for="item in [3,4,5,6,7,8]">{{ item }}</option>
+        </select>
+      </p>
     </header>
     <!-- 容器 -->
     <div class="wrap">
@@ -115,6 +125,14 @@
          */
         watch(() => data.level, () => {
           handleReset();
+        });
+        watch(() => config.row, () => {
+          data.select.clear();
+          data.cards = [];
+        });
+        watch(() => config.col, () => {
+          data.select.clear();
+          data.cards = [];
         });
 
         /**
@@ -353,6 +371,7 @@
         const dataRefs = toRefs(data);
         return {
           ...dataRefs,
+          config,
           handleStart,
           setContainerStyle,
           setCardStyle,

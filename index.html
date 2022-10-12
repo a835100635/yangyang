@@ -29,7 +29,7 @@
     </header>
     <!-- 容器 -->
     <div class="wrap">
-      <div class="container" :style="setContainerStyle()">
+      <div class="container" ref="containerRef" :style="setContainerStyle()">
         <div class="card-wrap"
           v-for="(item, index) in cards" 
           :key="index"  
@@ -48,7 +48,7 @@
     <div class="card-slot"></div>
   </div>
   <script>
-    const { reactive, toRefs, setup, computed, onMounted, watch } = Vue;
+    const { reactive, ref, toRefs, setup, computed, onMounted, watch } = Vue;
     const App = {
       setup() {
         /**
@@ -88,12 +88,20 @@
         }
 
         onMounted(() => {
-          const containerDom = document.querySelector('.container');
-          data.containerInfo = containerDom.getClientRects()[0];
-          const cardSlotDom = document.querySelector('.card-slot');
-          data.cardSlotInfo = cardSlotDom.getClientRects()[0];
+          getDoMInfo();
         })
+        const getDoMInfo = () => {
+          setTimeout(() => {
+            const containerDom = document.querySelector('.container');
+            data.containerInfo = containerDom.getClientRects()[0];
+            console.log('containerInfo', data.containerInfo, containerRef.value);
+            const cardSlotDom = document.querySelector('.card-slot');
+            data.cardSlotInfo = cardSlotDom.getClientRects()[0];
+            console.log('cardSlotInfo', data.cardSlotInfo);
+          })
+        }
 
+        const containerRef = ref();
         // 配置项
         const config = reactive({
           // 与卡片宽度一致
@@ -127,10 +135,12 @@
           handleReset();
         });
         watch(() => config.row, () => {
+          getDoMInfo();
           data.select.clear();
           data.cards = [];
         });
         watch(() => config.col, () => {
+          getDoMInfo();
           data.select.clear();
           data.cards = [];
         });
@@ -308,7 +318,7 @@
               alert('游戏失败 重新开始');
               init();
             }
-          }, config.animationTime);
+          }, config.animationTime + 100);
 
         }
 
@@ -317,7 +327,7 @@
          */
         const refreshCardPosition = (item) => {
           const { x, y } = data.cardSlotInfo;
-          const { top } = data.containerInfo;
+          const { top, left } = data.containerInfo;
 
           if (item) {
             // 是否存在
@@ -331,9 +341,10 @@
           }
           // 重新刷新位置
           let index = 0;
+          const poor = (x < left) ? -(left - x) : (x - left);
           data.select.forEach((item) => {
             item.forEach((card) => {
-              card.x = index * config.base + config.base / 2;
+              card.x = index * config.base + poor + config.base / 2;
               card.y = y - top + 12;
               index++;
             });

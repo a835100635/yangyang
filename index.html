@@ -29,7 +29,7 @@
     </header>
     <!-- 容器 -->
     <div class="wrap">
-      <div class="container" ref="containerRef" :style="setContainerStyle()">
+      <div class="container" :style="setContainerStyle()">
         <div class="card-wrap"
           v-for="(item, index) in cards" 
           :key="index"  
@@ -93,15 +93,12 @@
         const getDoMInfo = () => {
           setTimeout(() => {
             const containerDom = document.querySelector('.container');
-            data.containerInfo = containerDom.getClientRects()[0];
-            console.log('containerInfo', data.containerInfo, containerRef.value);
+            data.containerInfo = containerDom.getBoundingClientRect();
             const cardSlotDom = document.querySelector('.card-slot');
-            data.cardSlotInfo = cardSlotDom.getClientRects()[0];
-            console.log('cardSlotInfo', data.cardSlotInfo);
+            data.cardSlotInfo = cardSlotDom.getBoundingClientRect();
           })
         }
 
-        const containerRef = ref();
         // 配置项
         const config = reactive({
           // 与卡片宽度一致
@@ -316,9 +313,9 @@
           setTimeout(() => {
             if(selectLength.value >= config.selectMaxLength) {
               alert('游戏失败 重新开始');
-              init();
+              handleReset();
             }
-          }, config.animationTime + 100);
+          }, config.animationTime);
 
         }
 
@@ -366,6 +363,9 @@
               cards.forEach((item) => {
                 item.display = true;
               })
+            }, config.animationTime - 100);
+
+            setTimeout(() => {
               // 属性卡槽卡片位置
               refreshCardPosition();
 
@@ -375,7 +375,7 @@
                 alert(`通关啦, 开始第${data.level + 1}关`);
                 data.level++;
               }
-            }, config.animationTime);
+            }, config.animationTime + 100);
           }
         }
 

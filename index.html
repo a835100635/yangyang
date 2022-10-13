@@ -371,9 +371,13 @@
 
               // 校验是否卡片列表是否还有未消除的卡片
               const hasCards = data.cards.filter((item) => !item.display);
-              if(!hasCards.length) {
-                alert(`通关啦, 开始第${data.level + 1}关`);
+              const level = data.level + 1;
+              if(!hasCards.length && level < config.maxLevel) {
+                alert(`通关啦, 开始第${level}关`);
                 data.level++;
+              } else {
+                alert('恭喜 🎉🎉 游戏通关咯 即将回到第一关');
+                data.level = 1;
               }
             }, config.animationTime + 100);
           }

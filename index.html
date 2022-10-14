@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
   <link rel="stylesheet" href="index.css">
   <script src="https://unpkg.com/vue@3.2.12/dist/vue.global.js"></script>
+  <script src="./utils/audio.js"></script>
   <title></title>
 </head>
 <body>
@@ -51,6 +52,13 @@
     const { reactive, ref, toRefs, setup, computed, onMounted, watch } = Vue;
     const App = {
       setup() {
+        // 初始化音乐控件
+        const audio = new CustomAudio({
+          template: '#app',
+          bgmSrc: './static/bgm.mp3',
+          clickBgm: './static/clickBgm.mp3'
+        });
+        window.customAudio = audio;
         /**
          * 容器样式
          */
@@ -91,12 +99,10 @@
           getDoMInfo();
         })
         const getDoMInfo = () => {
-          setTimeout(() => {
-            const containerDom = document.querySelector('.container');
-            data.containerInfo = containerDom.getBoundingClientRect();
-            const cardSlotDom = document.querySelector('.card-slot');
-            data.cardSlotInfo = cardSlotDom.getBoundingClientRect();
-          })
+          const containerDom = document.querySelector('.container');
+          data.containerInfo = containerDom.getBoundingClientRect();
+          const cardSlotDom = document.querySelector('.card-slot');
+          data.cardSlotInfo = cardSlotDom.getBoundingClientRect();
         }
 
         // 配置项
@@ -114,7 +120,7 @@
           // 行
           row: 8,
           // 列
-          col: 8,
+          col: 8
         });
 
         const data = reactive({
@@ -254,9 +260,10 @@
          */
         const handleStart = () => {
           if(data.cards.length) {
-              window.alert('游戏中');
-              return;
+            window.alert('游戏中');
+            return;
           }
+          audio.play();
           init();
         }        
         
@@ -268,6 +275,7 @@
           data.cards.length = 0;
           data.select.clear();
           init();
+          audio.replay();
         }
 
         /**
@@ -295,6 +303,9 @@
         const clickCard = async (item, index) => {
           // 卡槽中的卡片不允许点击
           if(item.status === 1) return;
+
+          // 播放点击音乐
+          audio.rePlayClickBgm();
 
           const length = selectLength.value;
           const { selectMaxLength } = config;
@@ -356,6 +367,7 @@
             cards.forEach((item) => {
               item.clear = true;
             })
+            
             setTimeout(() => {
               // 删除卡槽中卡片
               data.select.delete(cards[0].icon);
@@ -375,9 +387,12 @@
               if(!hasCards.length && level < config.maxLevel) {
                 alert(`通关啦, 开始第${level}关`);
                 data.level++;
-              } else {
+              }
+              if (!hasCards.length && level >= config.maxLevel) {
+                {
                 alert('恭喜 🎉🎉 游戏通关咯 即将回到第一关');
                 data.level = 1;
+              }
               }
             }, config.animationTime + 100);
           }

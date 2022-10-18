@@ -834,6 +834,57 @@ const handleSwitch = (type) => {
 ```
 
 ## 背景音乐
+   使用audio标签进行控制
+```js
+// 创建音乐构造函数
+function CustomAudio(config) {
+    this.config = config;
+}
+```
+初始化
+```js
+CustomAudio.prototype.init = function() {
+  const { bgmSrc, clickBgm } = this.config;
+  this.createAudioDom([
+    {
+      key: 'audio',
+      loop: true,
+      src: bgmSrc
+    }, 
+    {
+      key: 'clickBgmAudio',
+      loop: false,
+      src: clickBgm
+    }
+  ]);
+}
+```
+
+```js
+
+// 创建audio dom元素
+CustomAudio.prototype.createAudioDom = function(config) {
+  const { template } = this.config;
+  config.forEach(item => {
+    this[item.key] = document.createElement('audio');
+    this[item.key].setAttribute('controls', '');
+    if (item.loop) {
+      this[item.key].setAttribute('loop', '');
+    }
+    
+    const source = document.createElement('source');
+    source.setAttribute('type', "audio/mpeg");
+    source.src = item.src;
+    
+    this[item.key].appendChild(source);
+    
+    this[item.key].setAttribute('style', 'display: none');
+    
+    document.querySelector(template).appendChild(this[item.key])
+  });
+}
+```
+
 
 ## 总结：目前所有功能都在这咯 后续加入其他的道具功能
 
